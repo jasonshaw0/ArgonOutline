@@ -1,0 +1,598 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+\lstset{
+  language=C++,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  tabsize=2,
+  breaklines=true,
+  breakatwhitespace=false,
+  escapeinside={\%*}{*)}
+}
+
+\begin{document}
+
+\title{EGN3000L - Fall 2024 Project Outline 1.1}
+\author{Jason Shaw - U72328959}
+\date{\today}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+\subsection{Disclaimer}
+The most important thing to know about this document is that it's not a finalized recipe. It should be interpreted as a basic outline, but there's still countless design decisions which need to be made, and all of these 11 pages are open to change at any time.\\
+
+All LaTeX code for this document can be found at: 
+
+\subsection{context}
+The idea for making a quadruped robot came early in the brainstorming process. It seemed like an innovative and interesting idea, so I went with it and started research.\\
+My initial design was based on DC motors and pulley belts, this design proved to be impractical with the size and cost restraints, and thus the idea outlined in this document was born.
+
+\subsection{Objectives}
+
+\begin{itemize}
+    \item Design a quadruped robot that fits within a 6\,in $\times$ 6\,in $\times$ 6\,in cube when fully assembled, utilizing foldable legs.
+    \item Use 12 SG90 servos (three per leg) for joint control.
+    \item Incorporate an Arduino Uno R3 and a PCA9685 PWM servo controller.
+    \item Use a GY-53 Laser ToF Sensor for following and obstical avoidance. 
+    \item Ensure safety and visual appeal suitable for elementary school children, with enclosed components and no exposed wires.
+    \item Develop accurate kinematic models and finalized calculations for leg movements.
+    \item Implement control algorithms with code suitable for the Arduino IDE.
+    \item Follow all project directions in accordance with the Egn-3000L project rubric. 
+\end{itemize}
+
+\section{Design Specifications}
+
+\subsection{Mechanical Design}
+
+\subsubsection{Body Frame}
+
+\begin{itemize}
+    \item \textbf{Dimensions}: 5.75\,in (L) $\times$ 5.75\,in (W) $\times$ 2\,in (H).
+    \item \textbf{Material}: 3D-printed PLA or ABS plastic.
+    \item \textbf{Features}:
+    \begin{itemize}
+        \item Hollow internal cavity (5.25\,in $\times$ 5.25\,in $\times$ 1.5\,in) for housing electronics.
+        \item Removable top cover for easy access to internal components.
+        \item Rounded edges and smooth surfaces for child safety.
+        \item Integrated mounting points for servos and sensors.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Leg Design with Folding Mechanism}
+
+Each leg consists of three segments controlled by SG90 servos:
+
+\paragraph{Upper Leg (Femur)}
+
+\begin{itemize}
+    \item \textbf{Length} ($L_1$): 2.0\,in (50.8\,mm).
+    \item \textbf{Width}: 0.5\,in.
+    \item \textbf{Thickness}: 0.25\,in.
+    \item \textbf{Attachment}: Connected to the body via a hip servo that allows a 90-degree inward fold.
+\end{itemize}
+
+\paragraph{Lower Leg (Tibia)}
+
+\begin{itemize}
+    \item \textbf{Length} ($L_2$): 1.5\,in (38.1\,mm).
+    \item \textbf{Width}: 0.4\,in.
+    \item \textbf{Thickness}: 0.25\,in.
+    \item \textbf{Attachment}: Connected to the upper leg via a knee servo; folds over the upper leg when compacted.
+\end{itemize}
+
+\paragraph{Foot (Tarsus)}
+
+\begin{itemize}
+    \item \textbf{Length} ($L_3$): 0.5\,in (12.7\,mm).
+    \item \textbf{Width}: 0.5\,in.
+    \item \textbf{Thickness}: 0.25\,in.
+    \item \textbf{Material}: Soft TPU filament for flexibility and grip.
+    \item \textbf{Attachment}: Connected via an ankle servo; folds up against the lower leg.
+\end{itemize}
+
+\subsubsection{Servo Mounts}
+
+\begin{itemize}
+    \item \textbf{Hip Servo Mounts}: Integrated into the body frame for precise control; mounting hole diameter of 2\,mm.
+    \item \textbf{Knee and Ankle Servo Mounts}: Built into leg joints for secure servo attachment.
+\end{itemize}
+
+\subsubsection{Folded Dimensions}
+
+\begin{itemize}
+    \item \textbf{Folded Leg Length}: 2.0\,in, fitting snugly along the body sides.
+    \item \textbf{Total Robot Dimensions When Folded}: 5.75\,in $\times$ 5.75\,in $\times$ 5.5\,in.
+\end{itemize}
+
+\subsection{Electrical Components}
+
+\subsubsection{Arduino Uno R3}
+
+\begin{itemize}
+    \item \textbf{Dimensions}: 2.7\,in $\times$ 2.1\,in.
+    \item \textbf{Placement}: Centrally mounted within the body frame.
+    \item \textbf{Function}: Main microcontroller for processing and control.
+\end{itemize}
+
+\subsubsection{PCA9685 PWM Servo Controller}
+
+\begin{itemize}
+    \item \textbf{Dimensions}: 1.6\,in $\times$ 1.0\,in.
+    \item \textbf{Placement}: Near the Arduino for efficient wiring.
+    \item \textbf{Function}: Controls all 12 servos via I\textsuperscript{2}C communication.
+\end{itemize}
+
+\subsubsection{Sensors}
+
+\paragraph{Selected Sensor: GY-53 Laser ToF Sensor}
+
+\begin{itemize}
+    \item \textbf{Dimensions}: 1.26\,in $\times$ 0.53\,in $\times$ 0.39\,in.
+    \item \textbf{Placement}: Front-mounted within a protective enclosure.
+    \item \textbf{Features}:
+    \begin{itemize}
+        \item Accurate distance measurements up to 5\,m.
+        \item Fast response times for obstacle avoidance.
+        \item Price: Approximately \$9.00.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Power Supply}
+
+\begin{itemize}
+    \item \textbf{Battery}: 7.4\,V LiPo battery (2S configuration).
+    \item \textbf{Dimensions}: Approx. 2.5\,in $\times$ 1.4\,in $\times$ 0.5\,in.
+    \item \textbf{Placement}: Underneath the electronics for a low center of gravity.
+    \item \textbf{Function}: Powers servos and microcontroller.
+\end{itemize}
+
+\subsection{Enclosure and Safety Features}
+
+\begin{itemize}
+    \item \textbf{Enclosed Wiring}: All wires routed internally to prevent exposure.
+    \item \textbf{Easy Access}: Removable top cover secured with screws for maintenance.
+    \item \textbf{Child-Friendly Design}:
+    \begin{itemize}
+        \item Smooth surfaces and rounded edges.
+        \item Bright colors and appealing aesthetics.
+    \end{itemize}
+\end{itemize}
+
+\section{Mathematics, Kinematics, and Physics}
+
+\subsection{Leg Kinematics}
+
+\subsubsection{Joint Configuration}
+
+Each leg has three rotational joints:
+
+\begin{itemize}
+    \item \textbf{Hip Joint} ($\theta_1$): Controls forward/backward swing.
+    \item \textbf{Knee Joint} ($\theta_2$): Controls leg extension.
+    \item \textbf{Ankle Joint} ($\theta_3$): Adjusts foot orientation.
+\end{itemize}
+
+\subsubsection{Link Lengths}
+
+\begin{itemize}
+    \item \textbf{Upper Leg Length} ($L_1$): 50.8\,mm.
+    \item \textbf{Lower Leg Length} ($L_2$): 38.1\,mm.
+    \item \textbf{Foot Length} ($L_3$): 12.7\,mm.
+\end{itemize}
+
+\subsection{Forward Kinematics}
+
+\subsubsection{Coordinate System}
+
+We define a 2D coordinate system in the sagittal plane (vertical plane along the direction of movement):
+
+\begin{itemize}
+    \item \textbf{Origin}: Hip joint.
+    \item \textbf{$x$-axis}: Horizontal direction.
+    \item \textbf{$z$-axis}: Vertical direction.
+\end{itemize}
+
+\subsubsection{Position Equations}
+
+The foot position $(x, z)$ is calculated using the joint angles:
+
+\begin{equation}
+\begin{aligned}
+x &= L_1 \cos(\theta_1) + L_2 \cos(\theta_1 + \theta_2) + L_3 \cos(\theta_1 + \theta_2 + \theta_3) \\
+z &= L_1 \sin(\theta_1) + L_2 \sin(\theta_1 + \theta_2) + L_3 \sin(\theta_1 + \theta_2 + \theta_3)
+\end{aligned}
+\end{equation}
+
+\subsection{Inverse Kinematics}
+
+\subsubsection{Objective}
+
+Given a desired foot position $(x_d, z_d)$, compute the joint angles $\theta_1$, $\theta_2$, and $\theta_3$.
+
+\subsubsection{Assumptions}
+
+To simplify calculations, we assume:
+
+\begin{itemize}
+    \item The foot remains parallel to the ground: $\theta_3 = -(\theta_1 + \theta_2)$.
+\end{itemize}
+
+\subsubsection{Calculations}
+
+\paragraph{Step 1: Compute Distance $D$}
+
+\begin{equation}
+D = \sqrt{(x_d - L_3 \cos(\theta_1 + \theta_2 + \theta_3))^2 + (z_d - L_3 \sin(\theta_1 + \theta_2 + \theta_3))^2}
+\end{equation}
+
+Since $\theta_3 = -(\theta_1 + \theta_2)$, $L_3$ contributes only to $x$.
+
+Simplify:
+
+\begin{equation}
+D = \sqrt{(x_d - L_3)^2 + z_d^2}
+\end{equation}
+
+\paragraph{Step 2: Compute Angle $\alpha$}
+
+\begin{equation}
+\alpha = \arctan2(z_d, x_d - L_3)
+\end{equation}
+
+\paragraph{Step 3: Compute $\theta_2$}
+
+\begin{equation}
+\cos(\theta_2) = \frac{L_1^2 + L_2^2 - D^2}{2 L_1 L_2}
+\end{equation}
+
+\begin{equation}
+\theta_2 = \arccos\left( \frac{L_1^2 + L_2^2 - D^2}{2 L_1 L_2} \right)
+\end{equation}
+
+\paragraph{Step 4: Compute Angle $\beta$}
+
+\begin{equation}
+\beta = \arccos\left( \frac{L_1^2 + D^2 - L_2^2}{2 L_1 D} \right)
+\end{equation}
+
+\paragraph{Step 5: Compute $\theta_1$}
+
+\begin{equation}
+\theta_1 = \alpha - \beta
+\end{equation}
+
+\paragraph{Step 6: Compute $\theta_3$}
+
+\begin{equation}
+\theta_3 = -(\theta_1 + \theta_2)
+\end{equation}
+
+\subsubsection{Example Calculation}
+
+\paragraph{Given}
+
+\begin{itemize}
+    \item Desired foot position: $x_d = 80\,\text{mm}$, $z_d = -20\,\text{mm}$.
+    \item Link lengths: $L_1 = 50.8\,\text{mm}$, $L_2 = 38.1\,\text{mm}$, $L_3 = 12.7\,\text{mm}$.
+\end{itemize}
+
+\paragraph{Calculations}
+
+\textbf{Compute $D$}:
+
+\[
+D = \sqrt{(80 - 12.7)^2 + (-20)^2} = \sqrt{(67.3)^2 + 400} = \sqrt{4528.29 + 400} = \sqrt{4928.29} \approx 70.24\,\text{mm}
+\]
+
+\textbf{Compute $\alpha$}:
+
+\[
+\alpha = \arctan2(-20, 67.3) \approx -16.57^\circ
+\]
+
+\textbf{Compute $\theta_2$}:
+
+\[
+\cos(\theta_2) = \frac{(50.8)^2 + (38.1)^2 - (70.24)^2}{2 \times 50.8 \times 38.1} = \frac{2580.64 + 1450.41 - 4933.62}{3875.76} = \frac{(4031.05 - 4933.62)}{3875.76} = -0.232
+\]
+
+\[
+\theta_2 = \arccos(-0.232) \approx 103.43^\circ
+\]
+
+\textbf{Compute $\beta$}:
+
+\[
+\beta = \arccos\left( \frac{(50.8)^2 + (70.24)^2 - (38.1)^2}{2 \times 50.8 \times 70.24} \right) = \arccos\left( \frac{2580.64 + 4933.62 - 1450.41}{7135.74} \right) = \arccos\left( \frac{6063.85}{7135.74} \right) \approx 31.25^\circ
+\]
+
+\textbf{Compute $\theta_1$}:
+
+\[
+\theta_1 = -16.57^\circ - 31.25^\circ = -47.82^\circ
+\]
+
+\textbf{Compute $\theta_3$}:
+
+\[
+\theta_3 = -(\theta_1 + \theta_2) = -(-47.82^\circ + 103.43^\circ) = -55.61^\circ
+\]
+
+\subsubsection{Final Joint Angles}
+
+\begin{itemize}
+    \item $\theta_1 = -47.82^\circ$
+    \item $\theta_2 = 103.43^\circ$
+    \item $\theta_3 = -55.61^\circ$
+\end{itemize}
+
+\subsection{Servo Angle Conversion}
+
+\subsubsection{Mapping Joint Angles to Servo Positions}
+
+SG90 servos have a range of approximately 0 to 180 degrees. We need to map the calculated joint angles to servo commands, accounting for servo mounting orientations.
+
+\paragraph{Servo Angles}
+
+\begin{itemize}
+    \item \textbf{Hip Servo Angle} ($\phi_1$):
+
+    \[
+    \phi_1 = 90^\circ + \theta_1
+    \]
+
+    \item \textbf{Knee Servo Angle} ($\phi_2$):
+
+    \[
+    \phi_2 = 90^\circ - \theta_2
+    \]
+
+    \item \textbf{Ankle Servo Angle} ($\phi_3$):
+
+    \[
+    \phi_3 = 90^\circ + \theta_3
+    \]
+
+\end{itemize}
+
+\paragraph{Example Servo Positions}
+
+Using the calculated joint angles:
+
+\begin{itemize}
+    \item $\phi_1 = 90^\circ + (-47.82^\circ) = 42.18^\circ$
+    \item $\phi_2 = 90^\circ - 103.43^\circ = -13.43^\circ$ (limit to servo's minimum angle, e.g., 0$^\circ$)
+    \item $\phi_3 = 90^\circ + (-55.61^\circ) = 34.39^\circ$
+\end{itemize}
+
+\textbf{Note}: Ensure servo angles are within the servo's operational range (0$^\circ$ to 180$^\circ$).
+
+\section{Motion Planning}
+
+\subsection{Gait Design}
+
+Implementing a \textbf{crawl gait} for maximum stability, moving one leg at a time.
+
+\subsection{Trajectory Generation}
+
+\subsubsection{Foot Trajectory}
+
+\begin{itemize}
+    \item \textbf{Horizontal Movement}:
+
+    \[
+    x(t) = x_{\text{start}} + (x_{\text{end}} - x_{\text{start}}) \frac{t}{T}
+    \]
+
+    \item \textbf{Vertical Movement} (Parabolic Path):
+
+    \[
+    z(t) = z_{\text{ground}} + h \left(1 - \left( \frac{2t}{T} - 1 \right)^2 \right)
+    \]
+
+    \item $t \in [0, T]$, where $T$ is the duration of the step.
+\end{itemize}
+
+\subsubsection{Parameters}
+
+\begin{itemize}
+    \item \textbf{Step Height} ($h$): 15\,mm.
+    \item \textbf{Step Duration} ($T$): 1\,s.
+    \item \textbf{Ground Level} ($z_{\text{ground}}$): Defined based on robot's standing height.
+    \item \textbf{Start and End Positions} ($x_{\text{start}}$, $x_{\text{end}}$): Determined by desired stride length.
+\end{itemize}
+
+\section{Software Development}
+
+\subsection{Programming Environment}
+
+\begin{itemize}
+ \item \textbf{IDE}: Arduino IDE.
+ \item \textbf{Language}: C++.
+ \item \textbf{Libraries}:
+ \begin{itemize}
+     \item \texttt{Wire.h} for I\textsuperscript{2}C communication.
+     \item \texttt{Adafruit\_PWMServoDriver.h} for PCA9685 control.
+ \end{itemize}
+\end{itemize}
+
+\subsection{Control Algorithm}
+
+\subsubsection{Main Loop Overview}
+
+The main loop will:
+
+\begin{enumerate}
+ \item Update the current time.
+ \item For each leg:
+ \begin{enumerate}
+     \item Calculate the time parameter $t$.
+     \item Compute desired foot position $(x, z)$.
+     \item Use inverse kinematics to calculate joint angles.
+     \item Map joint angles to servo positions.
+     \item Command servos via PCA9685.
+ \end{enumerate}
+ \item Read sensor data for obstacle detection.
+ \item Adjust gait or stop movement if necessary.
+\end{enumerate}
+
+\subsubsection{Main Control Loop Code}
+
+\begin{lstlisting}[language=C++, caption=Main Control Loop]
+// Main control loop
+void loop() {
+ unsigned long currentTime = millis();
+
+ // Loop through each leg
+ for (int leg = 0; leg < 4; leg++) {
+     // Calculate time parameter t for current leg
+     float t = fmod((currentTime + phaseOffset[leg]), stepDuration) / stepDuration;
+
+     // Compute desired foot position
+     float x = xStart + (xEnd - xStart) * t;
+     float z = zGround + stepHeight * (1 - pow((2 * t - 1), 2));
+
+     // Compute joint angles
+     float theta1, theta2, theta3;
+     computeJointAngles(x, z, &theta1, &theta2, &theta3);
+
+     // Map joint angles to servo positions
+     int phi1 = 90 + theta1;
+     int phi2 = 90 - theta2;
+     int phi3 = 90 + theta3;
+
+     // Command servos
+     pwm.setPWM(hipServo[leg], 0, angleToPulse(phi1));
+     pwm.setPWM(kneeServo[leg], 0, angleToPulse(phi2));
+     pwm.setPWM(ankleServo[leg], 0, angleToPulse(phi3));
+ }
+
+ // Sensor reading and gait adjustment
+ checkSensorsAndAdjustGait();
+
+ delay(loopDelay);
+}
+\end{lstlisting}
+
+\subsubsection{Compute Joint Angles Function}
+
+\begin{lstlisting}[language=C++, caption=Compute Joint Angles Function]
+// Function to compute joint angles based on desired foot position
+void computeJointAngles(float x, float z, float* theta1, float* theta2, float* theta3) {
+ // Link lengths in mm
+ float L1 = 50.8;
+ float L2 = 38.1;
+ float L3 = 12.7;
+
+ // Adjust x for foot length
+ float adjustedX = x - L3 * cos(0); // Assuming foot is parallel to ground
+
+ // Distance D
+ float D = sqrt(adjustedX * adjustedX + z * z);
+
+ // Angle alpha
+ float alpha = atan2(z, adjustedX);
+
+ // Law of Cosines for theta2
+ float cosTheta2 = (L1*L1 + L2*L2 - D*D) / (2 * L1 * L2);
+ cosTheta2 = constrain(cosTheta2, -1.0, 1.0); // Ensure within valid range
+ float theta2Rad = acos(cosTheta2);
+ *theta2 = degrees(theta2Rad);
+
+ // Law of Cosines for beta
+ float cosBeta = (L1*L1 + D*D - L2*L2) / (2 * L1 * D);
+ cosBeta = constrain(cosBeta, -1.0, 1.0);
+ float betaRad = acos(cosBeta);
+ float beta = degrees(betaRad);
+
+ // Theta1 calculation
+ *theta1 = degrees(alpha) - beta;
+
+ // Theta3 calculation
+ *theta3 = -(*theta1 + *theta2);
+}
+\end{lstlisting}
+
+\subsubsection{Angle to Pulse Conversion}
+
+\begin{lstlisting}[language=C++, caption=Angle to Pulse Conversion]
+// Convert servo angle to PWM pulse length
+int angleToPulse(int angle) {
+ int pulseMin = 150; // Corresponds to 0 degrees
+ int pulseMax = 600; // Corresponds to 180 degrees
+ int pulse = map(angle, 0, 180, pulseMin, pulseMax);
+ return pulse;
+}
+\end{lstlisting}
+
+\subsubsection{Sensor Reading and Gait Adjustment}
+
+\begin{lstlisting}[language=C++, caption=Sensor Reading and Gait Adjustment]
+// Function to check sensors and adjust gait if necessary
+void checkSensorsAndAdjustGait() {
+ int distance = readDistanceSensor();
+ if (distance < obstacleThreshold) {
+     // Stop movement or adjust gait
+     stopMovement();
+ } else {
+     // Continue normal gait
+ }
+}
+
+// Function to read distance from GY-53 sensor
+int readDistanceSensor() {
+ // Implement I2C communication with GY-53 sensor
+ // Return measured distance in mm
+}
+\end{lstlisting}
+
+\subsection{Safety Features in Code}
+
+\begin{itemize}
+ \item **Angle Constraints**: Use the `constrain()` function to ensure servo angles remain within 0 to 180 degrees.
+ \item **Failsafe Conditions**: Implement checks to stop the robot if sensor readings indicate an unsafe condition.
+ \item **Power Management**: Include code to monitor battery voltage and alert or shut down if voltage is too low.
+\end{itemize}
+
+\section{Testing and Validation}
+
+\subsection{Simulation}
+
+Before hardware implementation, simulate the kinematics and control algorithms using software tools like MATLAB or Python to validate calculations.
+
+\subsection{Prototype Testing}
+
+\begin{itemize}
+    \item Test individual leg movements.
+    \item Verify inverse kinematics calculations match physical movements.
+    \item Validate obstacle avoidance functionality.
+\end{itemize}
+
+\section{Conclusion}
+
+This document serves as both a proposal and outline. I feel this is a good approach to executing this project, but this outline is also open to change at any time during the build process.
+
+\end{document}
